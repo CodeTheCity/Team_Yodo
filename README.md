@@ -5,16 +5,21 @@
 ## Overview
 
 This project involves monitoring water and beach conditions using various data sources and machine learning models.
+We are developing an app that detects whether people are drowning in open water.
 
 ## Tidal Info
 
-We developed a Python script that interacts with tidal and weather APIs. Currently, we are working on functions to calculate the level of risk for each measurement.
+We developed a Python script that interacts with tidal and weather APIs, and calculated the level of risk.
 
 ### Risks
 
 -   **Wind**: The strength of the wind determines the risk.
 -   **Temperature**: Colder temperatures increase the risk.
 -   **Tide**: The difference between the tides determines the level of risk.
+
+## Future Work
+- Decrease the zone of clarity
+- Insert another method that would update the value
 
 ## Swimmer Detection
 
@@ -25,7 +30,7 @@ We created a model using YOLOv8n as a base to detect humans and swimmers.
 -   Enhance the risk calculation functions.
 -   Improve the accuracy of the swimmer detection model.
 -   Integrate additional data sources for more comprehensive monitoring.
--   Have areas of priority
+-   Have zone of clarity
 
 ## How to Use
 
