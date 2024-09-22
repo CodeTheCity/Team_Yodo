@@ -5,6 +5,7 @@
 ## Overview
 
 This project involves monitoring water and beach conditions using various data sources and machine learning models.
+We are developing an app that detects whether people are drowning in open water.
 
 ## Tidal Info
 
