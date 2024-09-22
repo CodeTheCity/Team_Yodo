@@ -5,6 +5,7 @@ class ConditionsWarning():
 
     cold = 15 # defined by RNLI
     blowy = 10*1000/(60*60)
+    gale = 40*1000/(60*60)
 
     def __init__(self, lat, long, weather_api, tide_station):
         self.lat = lat
@@ -13,6 +14,9 @@ class ConditionsWarning():
         self.station_code = tide_station
         self.weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={self.lat}&lon={self.long}&appid={self.wapi}&units=metric"
         self.tide_url = f"http://environment.data.gov.uk/flood-monitoring/id/stations/{self.station_code}"
+        self.tide_history_url = None
+        self.last_tide = 2.137
+        self.previous_tide_risk = 0
         self.high = 2.5 # We need a general way to generate this from an arbitrary location
         self.risk_level = {0:"low", 1:"medium", 2:"high", 3:"very high"}
 
@@ -34,28 +38,48 @@ class ConditionsWarning():
         else:
             print(f"Error fetching tide data: {response.status_code}.")
             return None
-    
+        
+    def get_tide_previous(self):
+        pass
+      
     def get_risk_level(self):
         depth = self.get_tide()
         temp, wind_speed = self.get_weather()
         return self.risk_function(depth, temp, wind_speed)
+    
+    def temp_risk(self, temp):
+        if temp > 15:
+            return 0
+        elif temp < 1:
+            return 1
+        else:
+            return 1/temp
+
+    def tide_risk(self, tide_diff):
+        if tide_diff < 0.01:
+            return 1
+        else:
+            return 0.01*(1/tide_diff)
+
+    def wind_risk(self, wind_speed):
+        if wind_speed < ConditionsWarning.blowy:
+            return 0
+        elif wind_speed > ConditionsWarning.gale:
+            return 1
+        else:
+            return ((wind_speed - ConditionsWarning.blowy)/(ConditionsWarning.gale-ConditionsWarning.blowy))**2
+        
 
     def risk_function(self, depth, temp, wind_speed):
         score = 0
-        print("Tide:", depth, "Threshold:", self.high, "m")
-        if depth > self.high:
-            score += 1
-        print("Temp:", temp, "Threshold:", f"{ConditionsWarning.cold:.2f}","C")
-        if temp < ConditionsWarning.cold:
-            score += 1
-        print("Wind Speed:", wind_speed, "Threshold:", f"{ConditionsWarning.blowy:.2f} m/s")
-        if wind_speed > ConditionsWarning.blowy:
-            score += 1
-        return self.risk_level[score]
+        score += self.wind_risk(wind_speed)*0.5
+        score += self.temp_risk(temp)*0.3
+        score += self.tide_risk(abs(2.379-2.137))
+        return score
         
 
 if __name__ == "__main__":
-    sample_time = 15
+    sample_time = 600
     iterations = 4
     lat, long = 57.0837, 2.0553
     weather_api = "02fadf78366ed16f7e79f0bf27ed4ba0"
